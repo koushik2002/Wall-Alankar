@@ -4,7 +4,7 @@
   color: var(--color-charcoal);
   background: var(--color-ivory);
   font-synthesis: none;
-  --color-primary: #1e1b76;
+  --color-primary: #22165c;
   --color-secondary: #4d4c8d;
   --color-gold: #d6c36a;
   --color-ivory: #f6f2e6;
@@ -84,11 +84,13 @@ img {
 }
 .navigation {
   height: 88px;
-  margin: 0 3.8%;
+  padding: 0 3.8%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--line);
+  color: var(--color-ivory);
+  background: var(--color-primary);
+  border-bottom: 1px solid #ffffff26;
 }
 .brand-logo {
   display: inline-flex;
@@ -1180,7 +1182,7 @@ label {
     padding-right: 6%;
   }
   .navigation {
-    margin: 0 6%;
+    padding: 0 6%;
   }
   .object-photo {
     height: 430px;
@@ -1225,7 +1227,7 @@ label {
 @media (max-width: 700px) {
   .navigation {
     height: 74px;
-    margin: 0 20px;
+    padding: 0 20px;
   }
   .brand-logo-image {
     width: 138px;
@@ -1237,7 +1239,8 @@ label {
     left: 0;
     right: 0;
     top: 74px;
-    background: #f5f3ed;
+    background: var(--color-primary);
+    border-top: 1px solid #ffffff26;
     padding: 25px;
     z-index: 10;
     flex-direction: column;
