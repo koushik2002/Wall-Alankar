@@ -107,11 +107,21 @@ const STATIC_PAGES = {
   },
 };
 
+function BrandLogo({ className = "" }) {
+  return (
+    <img
+      className={`brand-logo-image ${className}`.trim()}
+      src={assetUrl("/images/wall-alankar-logo.png")}
+      alt="Wall Alankar — Premium Home Decor"
+    />
+  );
+}
+
 function StaticPage({ page }) {
   return (
     <main className="static-page">
-      <a className="wordmark" href={routeUrl("/")}>
-        wall alankar<span>OBJECTS & SPACES</span>
+      <a className="brand-logo" href={routeUrl("/")} aria-label="Wall Alankar home">
+        <BrandLogo />
       </a>
       <section>
         <span className="overline">{page.eyebrow}</span>
@@ -693,8 +703,12 @@ function App() {
   return (
     <>
       <header className="navigation">
-        <button className="wordmark" onClick={() => nav("home")}>
-          wall alankar<span>OBJECTS & SPACES</span>
+        <button
+          className="brand-logo"
+          aria-label="Wall Alankar home"
+          onClick={() => nav("home")}
+        >
+          <BrandLogo />
         </button>
         <nav className={mobile ? "is-open" : ""}>
           <button onClick={() => nav("collection")}>The collection</button>
@@ -1686,10 +1700,7 @@ function App() {
               </button>
             </div>
             <div className="invoice-brand">
-              <div>
-                <span>WALL ALANKAR</span>
-                <small>OBJECTS & SPACES</small>
-              </div>
+              <BrandLogo className="invoice-logo" />
               <strong>
                 {invoice.legalDetailsVerified
                   ? "TAX INVOICE"

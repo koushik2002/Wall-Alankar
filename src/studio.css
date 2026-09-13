@@ -90,19 +90,15 @@ img {
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
 }
-.wordmark {
-  font-family: "Manrope";
-  font-size: 23px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  text-align: left;
-  line-height: 1.1;
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
 }
-.wordmark span {
-  display: block;
-  font: 8px "DM Sans";
-  letter-spacing: 2.5px;
-  margin-top: 5px;
+.brand-logo-image {
+  width: 190px;
+  height: 63px;
+  object-fit: contain;
 }
 .navigation nav {
   display: flex;
@@ -1149,9 +1145,8 @@ label {
   padding: 42px 6vw;
   background: var(--color-ivory);
 }
-.static-page > .wordmark {
-  display: inline-block;
-  color: var(--color-primary);
+.static-page > .brand-logo {
+  display: inline-flex;
 }
 .static-page section {
   width: min(760px, 100%);
@@ -1232,11 +1227,9 @@ label {
     height: 74px;
     margin: 0 20px;
   }
-  .wordmark {
-    font-size: 18px;
-  }
-  .wordmark span {
-    font-size: 6px;
+  .brand-logo-image {
+    width: 138px;
+    height: 46px;
   }
   .navigation nav {
     display: none;
@@ -1609,14 +1602,9 @@ label {
   padding-bottom: 30px;
   border-bottom: 2px solid #353b2e;
 }
-.invoice-brand > div span {
-  display: block;
-  font: 800 24px "Manrope";
-  letter-spacing: -1px;
-}
-.invoice-brand > div small {
-  font-size: 7px;
-  letter-spacing: 2.5px;
+.invoice-brand .invoice-logo {
+  width: 230px;
+  height: 76px;
 }
 .invoice-brand > strong {
   font: 500 23px "Manrope";
@@ -1712,6 +1700,10 @@ label {
   }
   .invoice-brand > strong {
     font-size: 17px;
+  }
+  .invoice-brand .invoice-logo {
+    width: 155px;
+    height: 51px;
   }
   .invoice-meta {
     grid-template-columns: 1fr;
