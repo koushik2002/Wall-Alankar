@@ -25,13 +25,27 @@ import "./studio.css";
 import { launchProducts } from "./data/products.js";
 import { api } from "./lib/api.js";
 
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
+const appPath = () => {
+  const path = location.pathname;
+  if (BASE_PATH && path.startsWith(BASE_PATH))
+    return path.slice(BASE_PATH.length) || "/";
+  return path;
+};
+const routeUrl = (path) => `${BASE_PATH}${path}` || "/";
+const assetUrl = (path) =>
+  path?.startsWith("/images/") ? `${BASE_PATH}${path}` : path;
+
 const INR = (n) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(n);
-const initial = launchProducts;
+const initial = launchProducts.map((product) => ({
+  ...product,
+  image: assetUrl(product.image),
+}));
 const storage = "wall-alankar-studio-v2";
 const fresh = () => ({
   products: initial,
@@ -96,7 +110,7 @@ const STATIC_PAGES = {
 function StaticPage({ page }) {
   return (
     <main className="static-page">
-      <a className="wordmark" href="/">
+      <a className="wordmark" href={routeUrl("/")}>
         wall alankar<span>OBJECTS & SPACES</span>
       </a>
       <section>
@@ -105,7 +119,7 @@ function StaticPage({ page }) {
         {page.body.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
-        <a className="underlined" href="/">
+        <a className="underlined" href={routeUrl("/")}>
           Back to the collection <ArrowUpRight />
         </a>
       </section>
@@ -128,9 +142,9 @@ const mapServerOrder = (order) => ({
   })),
 });
 function App() {
-  const initialSlug = location.pathname.match(/^\/products\/([^/]+)\/?$/)?.[1];
+  const initialSlug = appPath().match(/^\/products\/([^/]+)\/?$/)?.[1];
   const [db, setDb] = useState(restore),
-    [admin, setAdmin] = useState(() => location.pathname.startsWith("/admin")),
+    [admin, setAdmin] = useState(() => appPath().startsWith("/admin")),
     [panel, setPanel] = useState(null),
     [detail, setDetail] = useState(
       () => initial.find((p) => p.slug === initialSlug)?.id || null,
@@ -177,7 +191,7 @@ function App() {
             style: product.style,
             material: product.material,
             size: product.dimensions,
-            image: product.image,
+            image: assetUrl(product.image),
             price:
               product.price_minor == null ? null : product.price_minor / 100,
             stock: product.stock,
@@ -201,18 +215,18 @@ function App() {
       .catch((error) => setNotice(error.message));
   }, [admin]);
   useEffect(() => {
-    if (admin || STATIC_PAGES[location.pathname]) return;
+    if (admin || STATIC_PAGES[appPath()]) return;
     const product = db.products.find((p) => p.id === detail);
-    if (!product && location.pathname === "/shop") return;
+    if (!product && appPath() === "/shop") return;
     const next = product ? `/products/${product.slug}` : "/";
-    if (location.pathname !== next) history.pushState({}, "", next);
+    if (appPath() !== next) history.pushState({}, "", routeUrl(next));
   }, [detail, db.products, admin]);
   useEffect(() => {
-    if (location.pathname === "/shop") setTimeout(() => go("collection"), 30);
+    if (appPath() === "/shop") setTimeout(() => go("collection"), 30);
   }, []);
   useEffect(() => {
     const pop = () => {
-      const slug = location.pathname.match(/^\/products\/([^/]+)\/?$/)?.[1];
+      const slug = appPath().match(/^\/products\/([^/]+)\/?$/)?.[1];
       setDetail(db.products.find((p) => p.slug === slug)?.id || null);
     };
     addEventListener("popstate", pop);
@@ -616,13 +630,13 @@ function App() {
   const nav = (id) => {
     setAdmin(false);
     const nextPath = id === "collection" ? "/shop" : "/";
-    if (location.pathname !== nextPath) history.pushState({}, "", nextPath);
+    if (appPath() !== nextPath) history.pushState({}, "", routeUrl(nextPath));
     setMobile(false);
     setTimeout(() => go(id), 30);
   };
   const openAdmin = (orders = false) => {
-    if (api.configured && !location.pathname.startsWith("/admin")) {
-      location.assign(orders ? "/admin/?tab=orders" : "/admin/");
+    if (api.configured && !appPath().startsWith("/admin")) {
+      location.assign(routeUrl(orders ? "/admin/?tab=orders" : "/admin/"));
       return;
     }
     setPanel(null);
@@ -674,7 +688,7 @@ function App() {
       </button>
     );
   };
-  const staticPage = STATIC_PAGES[location.pathname];
+  const staticPage = STATIC_PAGES[appPath()];
   if (staticPage) return <StaticPage page={staticPage} />;
   return (
     <>
@@ -735,7 +749,7 @@ function App() {
             </h1>
             <div className="opening-photo">
               <img
-                src="/images/foyer-2026.webp"
+                src={assetUrl("/images/foyer-2026.webp")}
                 alt="Brass mirror above a walnut console in a warm sunlit interior"
                 fetchPriority="high"
               />
@@ -1070,7 +1084,7 @@ function App() {
           </section>
           <section id="story" className="story-section">
             <img
-              src="/images/gallery-room.jpg"
+              src={assetUrl("/images/gallery-room.jpg")}
               alt="Light-filled interior with artwork and a mirror"
               loading="lazy"
             />
@@ -1128,11 +1142,11 @@ function App() {
               <a href="tel:+919164600045">+91 91646 00045</a>
               <a href="mailto:info@wallalankar.com">info@wallalankar.com</a>
               <div className="footer-links">
-                <a href="/about">About</a>
-                <a href="/contact">Contact</a>
-                <a href="/privacy">Privacy</a>
-                <a href="/terms">Terms</a>
-                <a href="/shipping-returns">Delivery & returns</a>
+                <a href={routeUrl("/about")}>About</a>
+                <a href={routeUrl("/contact")}>Contact</a>
+                <a href={routeUrl("/privacy")}>Privacy</a>
+                <a href={routeUrl("/terms")}>Terms</a>
+                <a href={routeUrl("/shipping-returns")}>Delivery & returns</a>
               </div>
               <button data-testid="admin" onClick={() => openAdmin()}>
                 Store management <ArrowUpRight size={15} />
@@ -1181,7 +1195,7 @@ function App() {
             <button
               onClick={() => {
                 setAdmin(false);
-                history.pushState({}, "", "/");
+                history.pushState({}, "", routeUrl("/"));
                 window.scrollTo(0, 0);
               }}
             >

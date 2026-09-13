@@ -46,3 +46,12 @@ npm run db:migrate:remote
 
 See [Architecture](docs/ARCHITECTURE.md), [Deployment](docs/DEPLOYMENT.md), [Operations](docs/OPERATIONS.md), and [release gaps](docs/RELEASE-GAPS.md).
 
+## Public GitHub Pages preview
+
+The `deploy-pages.yml` workflow publishes the `production` branch at:
+
+```text
+https://koushik2002.github.io/Wall-Alankar/
+```
+
+In GitHub, open **Settings → Pages** and set **Source** to **GitHub Actions**. Every later push to `production` will verify and redeploy the public preview. GitHub Pages hosts the storefront in local-demo mode; the shared Worker/D1 production backend is deployed separately as described in `docs/DEPLOYMENT.md`.
