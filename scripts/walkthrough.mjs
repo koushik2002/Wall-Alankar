@@ -1,0 +1,55 @@
+import {chromium} from 'playwright';
+import ffmpeg from 'ffmpeg-static';
+import {execFileSync} from 'node:child_process';
+import {mkdir,writeFile,copyFile} from 'node:fs/promises';
+const out='deliverables';await mkdir(`${out}/recording`,{recursive:true});
+const scenes=[
+ ['A new expression of home','Welcome to the new Wall Alankar. An oversized wordmark, warm interior imagery, and a quieter colour palette introduce a fresh approach to premium home decor. This walkthrough uses illustrative products and prices.'],
+ ['Discover the collection','Explore the collection by material and room. Search for an object, change the price order, or narrow the selection to mirrors. Clear product details and realistic imagery make the catalogue easier to explore.'],
+ ['Save, inspect, select','Save favourite pieces with the heart button, then open a product to see its dimensions, materials, price and availability. Your saved collection stays available after a page refresh.'],
+ ['A cart that respects stock','The plus button adds an object to your selection. Increase or reduce the quantity directly on the card. Quantities cannot exceed available stock, and out of stock products cannot be added. The cart shows a running estimate.'],
+ ['Request first. Confirm together.','Enter your contact details and create an order request. No payment is collected online. A prepared WhatsApp message lets the customer continue the conversation with the store. Creating the request alone does not deduct stock.'],
+ ['Wall Match: colour and scale','Wall Match helps explore a room before committing. Select an object, try different wall colours, and adjust the wall and artwork widths. This is an approximate mood and scale study, with personal advice available on WhatsApp.'],
+ ['Bring your own wall','You can load a photograph of your own wall directly in the browser. The image stays local. The recommendation link includes your selected object and measurements. Attach the wall photograph separately in WhatsApp when speaking with the team.'],
+ ['From an object to a whole space','The approach section leads to custom and bulk project enquiries. The footer provides the Bengaluru showroom address, phone and email links, and a visit enquiry. Store management opens the operations workspace.'],
+ ['The order desk','The dashboard brings pending requests, inventory value, available units and queued Tally movements together. Staff confirm a sale after agreeing details with the customer. Confirmation deducts the requested stock exactly once.'],
+ ['Returns and live inventory','A confirmed order can be returned and restocked. Inventory adjustments let staff record new purchases or reduce quantities. Every stock movement is recorded in the ledger, and the website reflects the new availability.'],
+ ['Tally queue and export','The Tally screen demonstrates a synchronization queue. Running the demo clears queued movements and records the event. Inventory can also be exported as a CSV file. This prototype simulates Tally and does not connect to a live accounting company.'],
+ ['Ready for the next conversation','Back in the storefront, the restocked object is now available to add. The design adapts to mobile, and local browser storage retains the demo state. Wall Alankar now connects discovery, personal advice and stock control in one coherent experience.']
+];
+const durations=[];
+for(let i=0;i<scenes.length;i++){
+ const path=`${out}/recording/voice-${i}.aiff`;execFileSync('say',['-v','Samantha','-r','155','-o',path,scenes[i][1]]);
+ let info='';try{execFileSync(ffmpeg,['-hide_banner','-i',path],{stdio:'pipe'})}catch(e){info=e.stderr.toString()}
+ const m=info.match(/Duration: (\d+):(\d+):([\d.]+)/);if(!m)throw Error('Unable to read narration duration');durations.push(Number(m[1])*3600+Number(m[2])*60+Number(m[3]));
+}
+console.log('Narration generated:',durations.map(d=>d.toFixed(1)).join(', '));
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const context=await browser.newContext({viewport:{width:1440,height:900},recordVideo:{dir:`${out}/recording`,size:{width:1440,height:900}}});
+const page=await context.newPage();const recordingStarted=Date.now();const marks=[];const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:5173');await page.evaluate(()=>document.fonts.ready);
+await page.evaluate(()=>{const cursor=document.createElement('div');cursor.id='demo-cursor';cursor.style.cssText='position:fixed;width:22px;height:22px;border:2px solid #fff;border-radius:50%;background:#9b482d99;z-index:9999;pointer-events:none;box-shadow:0 0 0 1px #9b482d;transform:translate(-50%,-50%)';document.body.append(cursor);addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px'});const label=document.createElement('div');label.id='demo-caption';label.style.cssText='position:fixed;bottom:18px;left:22px;z-index:9998;color:#f5f3ed;background:#292d25e8;border-left:3px solid #bf8764;padding:12px 22px;font:12px Arial;letter-spacing:.3px;pointer-events:none;box-shadow:0 4px 18px #0002';document.body.append(label)});
+const wait=ms=>page.waitForTimeout(ms);
+async function click(locator){await locator.scrollIntoViewIfNeeded();const b=await locator.boundingBox();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:16});await wait(350);await locator.click();await wait(600)}
+const button=(name)=>page.getByRole('button',{name,exact:true});
+async function scroll(id){await page.locator(id).evaluate(el=>window.scrollTo({top:el.getBoundingClientRect().top+scrollY-25,behavior:'smooth'}));await wait(1400)}
+async function scene(i,action){const start=(Date.now()-recordingStarted)/1000;await page.locator('#demo-caption').evaluate((el,text)=>el.textContent=text,`${String(i+1).padStart(2,'0')}  /  ${scenes[i][0]}`);console.log('Recording',i+1,scenes[i][0]);await action();const elapsed=(Date.now()-recordingStarted)/1000-start;await wait(Math.max(1000,(durations[i]+2-elapsed)*1000));marks.push({start,duration:(Date.now()-recordingStarted)/1000-start,title:scenes[i][0]})}
+await scene(0,async()=>{await wait(3500);await page.mouse.move(870,460,{steps:20});await page.evaluate(()=>window.scrollTo({top:170,behavior:'smooth'}))});
+await scene(1,async()=>{await scroll('#collection');await click(button('Mirrors'));await page.getByRole('combobox',{name:'Sort products'}).selectOption('Price: low to high');await wait(1700);await click(button('All objects'));await page.locator('#search').fill('Surya');await wait(1600);await page.locator('#search').fill('');await page.getByRole('combobox',{name:'Sort products'}).selectOption('Curated')});
+await scene(2,async()=>{await click(button('Save Surya / the brass circle'));await click(page.getByRole('button',{name:'♡ Saved (1)',exact:true}));await wait(2000);await click(page.getByRole('button',{name:'♡ Saved (1)',exact:true}));await click(button('View Surya / the brass circle'));await wait(6000);await click(button('Close details'))});
+await scene(3,async()=>{await click(button('Add Mayura / sculptural study to cart'));await click(button('Add one Mayura / sculptural study'));await click(button('Add one Mayura / sculptural study'));await click(button('Remove one Mayura / sculptural study'));await page.evaluate(()=>window.scrollTo({top:0,behavior:'smooth'}));await wait(900);await click(button('Open cart'))});
+await scene(4,async()=>{await page.getByLabel('Your name',{exact:true}).fill('Ananya Rao');await wait(500);await page.getByLabel('Phone number',{exact:true}).fill('9999999999');await wait(500);await page.getByLabel('City / PIN code',{exact:true}).fill('Bengaluru 560027');await click(button('Create WhatsApp request'));await wait(4000);await page.getByRole('link',{name:'Open WhatsApp message'}).hover();await wait(2000);await click(button('Close selection'))});
+await scene(5,async()=>{await scroll('#planner');await page.getByLabel('Planner object',{exact:true}).selectOption('2');await click(button('Wall colour #c49175'));await wait(2000);await click(button('Wall colour #bcc3b6'));await page.getByLabel('Wall width',{exact:true}).fill('300');await page.getByLabel('Artwork width',{exact:true}).fill('140');await wait(1800)});
+await scene(6,async()=>{await page.getByLabel('Upload wall photo').setInputFiles('public/images/gallery-room.jpg');await wait(5000);await page.getByRole('link',{name:'Get a personal recommendation'}).hover();await wait(2500);await click(button('Remove photo'))});
+await scene(7,async()=>{await scroll('#story');await wait(6500);await scroll('footer');await wait(6000);await click(page.getByTestId('admin'))});
+await scene(8,async()=>{await wait(4500);await click(button('Orders'));await wait(1800);await click(button('Confirm sale'));await wait(4500)});
+await scene(9,async()=>{await click(button('Return & restock'));await wait(1500);await click(button('Inventory'));await click(button('Adjust Svara / a quiet composition'));await page.getByLabel('Quantity change',{exact:true}).fill('5');await wait(3500);await click(button('Save stock movement'));await wait(1700)});
+await scene(10,async()=>{await click(button('Tally sync'));await wait(2500);await click(button('Run demo sync'));await wait(2500);const download=page.waitForEvent('download');await click(button('Export inventory'));await(await download).saveAs(`${out}/sample-inventory.csv`)});
+await scene(11,async()=>{await click(page.getByRole('button',{name:'Back to storefront',exact:false}));await scroll('#collection');await wait(3000);await click(button('Add Svara / a quiet composition to cart'));await wait(2500);await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));await wait(4000);await page.screenshot({path:`${out}/mobile-preview.png`,fullPage:true});await page.setViewportSize({width:1440,height:900});await page.evaluate(()=>window.scrollTo({top:0,behavior:'smooth'}));await wait(3000)});
+await page.locator('#demo-caption').evaluate(el=>el.textContent='WALL ALANKAR  /  SPACE, WITH SOUL.');await wait(2500);
+const video=page.video();await context.close();const raw=await video.path();await browser.close();if(errors.length)throw Error(errors.join('\n'));
+await writeFile(`${out}/recording/chapters.json`,JSON.stringify(marks,null,2));await writeFile(`${out}/narration.txt`,scenes.map((s,i)=>`${i+1}. ${s[0]}\n${s[1]}`).join('\n\n'));
+const args=['-y','-i',raw];scenes.forEach((_,i)=>args.push('-i',`${out}/recording/voice-${i}.aiff`));
+const filters=marks.map((m,i)=>`[${i+1}:a]adelay=${Math.round(m.start*1000)}:all=1[a${i}]`);filters.push(marks.map((_,i)=>`[a${i}]`).join('')+`amix=inputs=${scenes.length}:normalize=0,apad[audio]`);
+args.push('-filter_complex',filters.join(';'),'-map','0:v','-map','[audio]','-c:v','libx264','-preset','fast','-crf','21','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',`${out}/Wall-Alankar-Walkthrough.mp4`);
+console.log('Encoding narrated MP4…');execFileSync(ffmpeg,args,{stdio:['ignore','ignore','pipe'],maxBuffer:20*1024*1024});console.log('DONE:',`${out}/Wall-Alankar-Walkthrough.mp4`);

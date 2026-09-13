@@ -1,0 +1,35 @@
+1. A new expression of home
+Welcome to the new Wall Alankar. An oversized wordmark, warm interior imagery, and a quieter colour palette introduce a fresh approach to premium home decor. This walkthrough uses illustrative products and prices.
+
+2. Discover the collection
+Explore the collection by material and room. Search for an object, change the price order, or narrow the selection to mirrors. Clear product details and realistic imagery make the catalogue easier to explore.
+
+3. Save, inspect, select
+Save favourite pieces with the heart button, then open a product to see its dimensions, materials, price and availability. Your saved collection stays available after a page refresh.
+
+4. A cart that respects stock
+The plus button adds an object to your selection. Increase or reduce the quantity directly on the card. Quantities cannot exceed available stock, and out of stock products cannot be added. The cart shows a running estimate.
+
+5. Request first. Confirm together.
+Enter your contact details and create an order request. No payment is collected online. A prepared WhatsApp message lets the customer continue the conversation with the store. Creating the request alone does not deduct stock.
+
+6. Wall Match: colour and scale
+Wall Match helps explore a room before committing. Select an object, try different wall colours, and adjust the wall and artwork widths. This is an approximate mood and scale study, with personal advice available on WhatsApp.
+
+7. Bring your own wall
+You can load a photograph of your own wall directly in the browser. The image stays local. The recommendation link includes your selected object and measurements. Attach the wall photograph separately in WhatsApp when speaking with the team.
+
+8. From an object to a whole space
+The approach section leads to custom and bulk project enquiries. The footer provides the Bengaluru showroom address, phone and email links, and a visit enquiry. Store management opens the operations workspace.
+
+9. The order desk
+The dashboard brings pending requests, inventory value, available units and queued Tally movements together. Staff confirm a sale after agreeing details with the customer. Confirmation deducts the requested stock exactly once.
+
+10. Returns and live inventory
+A confirmed order can be returned and restocked. Inventory adjustments let staff record new purchases or reduce quantities. Every stock movement is recorded in the ledger, and the website reflects the new availability.
+
+11. Tally queue and export
+The Tally screen demonstrates a synchronization queue. Running the demo clears queued movements and records the event. Inventory can also be exported as a CSV file. This prototype simulates Tally and does not connect to a live accounting company.
+
+12. Ready for the next conversation
+Back in the storefront, the restocked object is now available to add. The design adapts to mobile, and local browser storage retains the demo state. Wall Alankar now connects discovery, personal advice and stock control in one coherent experience.
